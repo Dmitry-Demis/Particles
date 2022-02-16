@@ -5,16 +5,19 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Particles"
         mc:Ignorable="d"
-        Title="LW3_MolecularDynamicsMethod" Height="450" Width="800"
+        Title="LW3_MolecularDynamicsMethod" 
+        Height="450" Width="800"
         Style="{DynamicResource ResourceKey=WindowStyle}"
         WindowState="Maximized"
-        DataContext="{Binding RelativeSource={RelativeSource Self}}">
+        DataContext="{Binding RelativeSource={RelativeSource Self}}"
+        ResizeMode="NoResize"
+        >
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto"/>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
-        <Border  BorderBrush="Red" BorderThickness="1" Grid.Column="1">
+        <Border Background="#303030"  BorderThickness="1" Grid.Column="1">
             <Canvas x:Name="myCanvas" Loaded="MyCanvas_OnLoaded">
                 <Image Name="myImage"></Image>
             </Canvas>
@@ -37,11 +40,11 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
             <TextBlock Grid.Column="0" Grid.Row="0" Text="Количество атомов"/>
-            <TextBox Grid.Column="1" Grid.Row="0" Width="50" Name="atomCount" Text="30"/>
+            <TextBox Grid.Column="1" Grid.Row="0" Width="50" Name="atomCount" Text="50"/>
             <TextBlock Grid.Column="0" Grid.Row="1" Text="Начальная скорость"/>
-            <TextBox Grid.Column="1" Grid.Row="1" Width="50" Text="50" Name="startVelocity"/>
+            <TextBox Grid.Column="1" Grid.Row="1" Width="50" Text="10" Name="startVelocity"/>
             <TextBlock Grid.Column="0" Grid.Row="2" Text="Радиус атомов"/>
-            <TextBox Grid.Column="1" Grid.Row="2" Width="50" Name="atomRadius" Text="50"/>
+            <TextBox Grid.Column="1" Grid.Row="2" Width="50" Name="atomRadius" Text="10"/>
             <Button Height="30" VerticalAlignment="Top"
                     Content="Рассчитать" Click="Solve_Click" Grid.Column="0" Grid.Row="3" Grid.ColumnSpan="2"/>
         </Grid>

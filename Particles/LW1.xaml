@@ -1,4 +1,4 @@
-﻿<Window x:Class="Particles.LW1_PendulumWindow"
+﻿<Window x:Class="Particles.LW1"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -13,6 +13,10 @@
         <Grid.Resources>
             <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource TextBlockStyle}">
                 <Setter Property="FontStyle" Value="Italic"/>
+            </Style>
+            <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource TextBlockStyle}"
+                   x:Key="NonItalic">
+                <Setter Property="FontStyle" Value="Normal"/>
             </Style>
         </Grid.Resources>
         <Grid.ColumnDefinitions>
@@ -36,12 +40,12 @@
                 <RowDefinition/>
                 <RowDefinition/>
             </Grid.RowDefinitions>
-            <TextBox Grid.Row="0" Grid.Column="1" Margin="5" Text="{Binding M}"/>
-            <TextBox Grid.Row="1" Grid.Column="1" Margin="5" Text="{Binding N}"/>
-            <TextBox Grid.Row="2" Grid.Column="1" Margin="5" Text="{Binding B}"/>
-            <TextBox Grid.Row="3" Grid.Column="1" Margin="5" Text="{Binding A}"/>
-            <TextBox Grid.Row="4" Grid.Column="1" Margin="5" Text="{Binding X}"/>
-            <TextBox Grid.Row="5" Grid.Column="1" Margin="5" Text="{Binding U}"/>
+            <TextBox Grid.Row="0" Grid.Column="1" Margin="5" x:Name="mField" Text="3"/>
+            <TextBox Grid.Row="1" Grid.Column="1" Margin="5" x:Name="nField" Text="3"/>
+            <TextBox Grid.Row="2" Grid.Column="1" Margin="5" x:Name="aField" Text="3"/>
+            <TextBox Grid.Row="3" Grid.Column="1" Margin="5" x:Name="bField" Text="3"/>
+            <TextBox Grid.Row="4" Grid.Column="1" Margin="5" x:Name="xField" Text="3"/>
+            <TextBox Grid.Row="5" Grid.Column="1" Margin="5" x:Name="uField" Text="3"/>
             <TextBlock Text="m = " Grid.Column="0" Grid.Row="0" Margin="5"/>
             <TextBlock Text="n = " Grid.Column="0" Grid.Row="1" Margin="5"/>
             <TextBlock 
@@ -85,8 +89,9 @@
                 </TextBlock>
             </TextBlock>
         </Grid>
-        <Border Grid.Column="1" Grid.Row="0" BorderBrush="Red" BorderThickness="1">
-            <Canvas x:Name="myCanvas" Grid.Column="1" Grid.Row="0" Loaded="MyCanvas_OnLoaded">
+         <Border Background="#303030"  BorderThickness="1" Grid.Column="1">
+            <Canvas x:Name="myCanvas" Loaded="MyCanvas_OnLoaded">
+                <Image Name="myImage"></Image>
             </Canvas>
         </Border>
         <Button 
@@ -96,8 +101,10 @@
                 <ColumnDefinition/>
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
-            <TextBlock Text="Result" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-            <TextBox Margin="5" Name="ResultBox" Grid.Column="1"/>
+            <TextBlock Text="Result" VerticalAlignment="Center" HorizontalAlignment="Center" Style="{StaticResource NonItalic}">
+             
+            </TextBlock>
+            <TextBox Margin="5" Name="ResultBox" Grid.Column="1" Text ="{Binding Result}"/>
         </Grid>
     </Grid>
 </Window>

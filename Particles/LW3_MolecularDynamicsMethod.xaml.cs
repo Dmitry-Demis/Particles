@@ -1,10 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Windows;
 using System.Drawing;
 using System.Globalization;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
+using Particles.Model;
 using Point = System.Windows.Point;
 
 namespace Particles
@@ -12,33 +13,11 @@ namespace Particles
     public partial class LW3_MolecularDynamicsMethod : Window
     {
         public LW3_MolecularDynamicsMethod() => InitializeComponent();
-        private const double N1 = 11.0;
-        private const double N2 = 5.0;
-        private const int A = 3;
-        private const int B = 4;
-        private static int N=25;
-
-        private double[]
-            x,
-            y,
-            xOld,
-            yOld ,
-            m ;
-
-        private double[] ux;
-        private double[] uy;
-        private double[] uOldX;
-        private double[] uOldY;
-        private double t = 0.0;
-        private double tmax = 100.0;
-        private double tau = 0.01;
-        private double xLen = 100;
-        private double yLen = 100;
-        private double maxR = 100;
-        private double radius;
-        private double startSpeed = 1;
-
-        private Random rand = new Random();
+        private static int N;
+        private float radius;
+        private float startSpeed = 1;
+        List<Atom> atoms = new List<Atom>();
+        private Random rnd = new Random();
         private BitmapImage BmpImageFromBmp(Bitmap bmp)
         {
             if (bmp == null) throw new ArgumentNullException(nameof(bmp));
@@ -65,15 +44,20 @@ namespace Particles
             {
                 // draw one thousand random white lines on a dark blue background
                 gfx.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
-                gfx.Clear(System.Drawing.Color.Navy);
-                for (int i = 0; i < N; i++)
+                gfx.Clear(Color.FromArgb(30,30,30));
+                foreach (var atom in atoms)
                 {
-                    var pt = new Point(x[i], y[i]);
+                    var pt = new Point(atom.X, atom.Y);
+                   
                     this.Dispatcher.Invoke(() =>
                     {
-                       gfx?.DrawEllipse(pen, (float)(pt.X), (float)(pt.Y), (int)radius, (int)radius);
-                        //gfx?.FillEllipse(new SolidBrush(Color.Aquamarine), (float)pt.X, (float)pt.Y, sizeOfEllipse, sizeOfEllipse);
-                       
+                        
+                        gfx?.FillEllipse(new SolidBrush(atom.Color), (float)pt.X, (float)pt.Y, (int)radius, (int)radius);
+                        gfx?.DrawEllipse(new Pen(atom.CirlceColor), (float)pt.X - radius / 2, (float)pt.Y - 1.5f * radius,
+                            (int)radius * 2, (int)radius * 4);
+                        gfx?.DrawEllipse(new Pen(atom.CirlceColor), (float)pt.X - 1.5f * radius, (float)pt.Y - radius / 2,
+                            (int)radius * 4, (int)radius * 2);
+
                     });
                 }
                 this.Dispatcher.Invoke(() =>
@@ -84,176 +68,51 @@ namespace Particles
         }
         private void MyCanvas_OnLoaded(object sender, RoutedEventArgs e)
         {
-            
+            Field.Width = (int)myCanvas.ActualWidth;
+            Field.Height = (int)myCanvas.ActualHeight;
         }
-
         private void Solve_Click(object sender, RoutedEventArgs e)
         {
             N = Convert.ToInt32(atomCount.Text);
-            radius = Convert.ToDouble(atomRadius.Text, CultureInfo.InvariantCulture);
-            startSpeed = Convert.ToDouble(startVelocity.Text, CultureInfo.InvariantCulture);
-            x = new double[N];
-            y = new double[N];
-            xOld = new double[N];
-            yOld = new double[N];
-            ux = new double[N];
-            uy = new double[N];
-            uOldX = new double[N];
-            uOldY = new double[N];
-            m = new double[N];
-            int minMass = 1;
-            int maxMass = 8;
-            for (int i = 0; i < N; i++)
+            radius = Convert.ToSingle(atomRadius.Text, CultureInfo.InvariantCulture);
+            startSpeed = Convert.ToSingle(startVelocity.Text, CultureInfo.InvariantCulture);
+            float r = (float)(radius / 2f);
+            float epsilon = 3.0f;
+            atoms.Clear();
+            for (int i = 0; i < N; i++) //цикл, пока не пройдет все атомы (count)  
             {
-                x[i] = rand.Next((int)radius, (int)(myCanvas.ActualWidth - radius));
-                y[i] = rand.Next((int)radius, (int)(myCanvas.ActualHeight - radius));
-                xOld[i] = x[i];
-                yOld[i] = y[i];
-                m[i] = rand.Next(minMass, maxMass);
-                ux[i] = (float)(rand.NextDouble() - 0.5) * startSpeed;
-                uy[i] = (float)(rand.NextDouble() - 0.5) * startSpeed;
-                uOldX[i] = ux[i];
-                uOldY[i] = uy[i];
-                //xc += 25;
-                //yc += 10;
+                Atom a = new LennardJonesAtom(radius, epsilon); //создание экземпляра конкретного атома класа Atom
+                a.X = rnd.Next((int)r, (int)(Field.Width - r)); //Присваивание радномных координат созданным атомам
+                a.Y = rnd.Next((int)r, (int)(Field.Height - r)); //Чтобы атом не создавался за пределами PictureBox, отнять r
+                a.Velocity = new PointF((float)(rnd.NextDouble() - 0.5) * startSpeed, (float)(rnd.NextDouble() - 0.5) * startSpeed);
+                int red = rnd.Next(0, 256);
+                int green = rnd.Next(0, 256);
+                int blue = rnd.Next(0, 256);
+                a.Color = Color.FromArgb(red, green, blue);
+                red = rnd.Next(0, 256);
+                green = rnd.Next(0, 256);
+                blue = rnd.Next(0, 256);
+                a.CirlceColor = Color.FromArgb(red, green, blue);
+                atoms.Add(a); //добавление созданных атомов в список
             }
-            Render();
-            Task.Run(Solution);
+            Task.Run(Go);
         }
-        private void Solution()
+        private void Go()
         {
             while (true)
             {
-                for (int i = 0; i < N; i++)
+                foreach (var a in atoms)
+                    a.ApplyForce(new PointF(0, 1f));
+
+                foreach (var a in atoms)
+                    a.Move();//для каждого атома из спиcка применяется функция Move
+                for (var i = 0; i < atoms.Count; i++)
+                for (var j = i + 1; j < atoms.Count; j++)
                 {
-                    double xSum = 0.0;
-                    for (int j = 0; j < N; j++)
-                    {
-                        if (i != j)
-                        {
-                            var r = Math.Sqrt(Math.Pow(xOld[i] - xOld[j], 2) + Math.Pow(yOld[i] - yOld[j], 2));
-                            if (Math.Abs(r - 2*radius) < 0.001)
-                            {
-                                continue;
-                                
-                            }
-                            xSum += (A / Math.Pow(r - 2 * radius, N1 + 1) - B / Math.Pow(r - 2 * radius, N2 + 1)) * (x[j] - x[i]);
-
-                        }
-                    }
-                    ux[i] = 1 / m[i] * (uOldX[i] + tau * xSum);
-                    double ySum = 0.0;
-                    for (int j = 0; j < N; j++)
-                    {
-                        if (i != j)
-                        {
-                            var r = Math.Sqrt(Math.Pow(xOld[i] - xOld[j], 2) + Math.Pow(yOld[i] - yOld[j], 2));
-                            if (Math.Abs(r - 2 * radius) < 0.001)
-                            {
-                                continue;
-
-                            }
-                            ySum += (A / Math.Pow(r - 2 * radius, N1 + 1) - B / Math.Pow(r - 2 * radius, N2 + 1)) * (y[j] - y[i]);
-
-                        }
-                    }
-                    uy[i] = 1 / m[i] * (uOldY[i] + tau * ySum);
-                    x[i] = xOld[i] + tau * uOldX[i];
-                    y[i] = yOld[i] + tau * uOldY[i];
-                    //double t = x[i];
-                    //if (t > 0.9 * myCanvas.ActualWidth || t < 0.1 * myCanvas.ActualWidth)
-                    //{
-                    //    x[i] = xOld[i] + tau * (-ux[i]);
-                    //}
-                    //t = y[i];
-                    //if (t > 0.9 * myCanvas.ActualHeight || t < 0.1 * myCanvas.ActualHeight)
-                    //{
-                    //    y[i] = yOld[i] + tau * (-uy[i]);
-                    //}
-                    double t = x[i] + tau * ux[i];
-                    int v = 1;
-                    int l = 1;
-                    if (t >  myCanvas.ActualWidth - radius || t < 0)
-                    {
-                        x[i] = xOld[i] + tau * (-ux[i]);
-                        xOld[i] = x[i];
-                        v *= -1;
-                    }
-                    else
-                    {
-                        xOld[i] = t;
-                    }
-                    t = y[i] + tau * uy[i];
-                    if (t > myCanvas.ActualHeight - radius || t < 0)
-                    {
-                        y[i] = yOld[i] + tau * (-uy[i]);
-                        yOld[i] = y[i];
-                        l *= -1;
-                    }
-                    else
-                    {
-                        yOld[i] = t;
-                    }
-
-                    uOldX[i] = v*ux[i];
-                    uOldY[i] = l*uy[i];
-                    
-                    
-                   
+                    atoms[i].CalcCollision(atoms[j]);
                 }
-                // t += tau;
                 Render();
             }
-        }
-
-        private double F(int i, string coord)
-        {
-            if (string.IsNullOrWhiteSpace(coord))
-                throw new ArgumentException("Value cannot be null or whitespace.", nameof(coord));
-            double sum = 0.0;
-            for (int j = 0; j < N; j++)
-            {
-                if (i != j)
-                {
-                    double r = Math.Sqrt(Math.Pow(xOld[i] - xOld[j], 2) + Math.Pow(yOld[i] - yOld[j], 2));
-
-                    sum += A / Math.Pow(r - 2 * radius, N1 + 1) + B / Math.Pow(r - 2 * radius, N2 + 1);
-                    sum *= (string.Equals(coord, "x", StringComparison.OrdinalIgnoreCase))
-                        ? (x[j] - x[i])
-                        : (y[j] - y[i]);
-                }
-            }
-            return sum;
-        }
-        private void Generate_Click(object sender, RoutedEventArgs e)
-        {
-            
-        }
-        double F1(int i)
-        {
-            double res = 0.0;
-
-            for (int j = 0; j < N; j++)
-            {
-                double sum = 0.0;
-                if (i != j)
-                {
-                    sum += A / Math.Pow(Math.Pow((xOld[i] - xOld[j]) * (xOld[i] - xOld[j]) + (yOld[i] - yOld[j]) * (yOld[i] - yOld[j]), 0.5), N1 + 1) - B / Math.Pow(Math.Pow((xOld[i] - xOld[j]) * (xOld[i] - xOld[j]) + (yOld[i] - yOld[j]) * (yOld[i] - yOld[j]), 0.5), N2 + 1);
-                    res = sum * (x[j] - x[i]);
-                }
-
-            }
-            return res;
-        }
-        double F2(int i)
-        {
-            double res = 0.0;
-            for (int j = 0; j < N; j++)
-            {
-                if (i != j)
-                    res += A / Math.Pow(Math.Pow((xOld[i] - xOld[j]) * (xOld[i] - xOld[j]) + (yOld[i] - yOld[j]) * (yOld[i] - yOld[j]), 0.5), N1 + 1) - B / Math.Pow(Math.Pow((xOld[i] - xOld[j]) * (xOld[i] - xOld[j]) + (yOld[i] - yOld[j]) * (yOld[i] - yOld[j]), 0.5), N2 + 1) * (y[j] - y[i]);
-            }
-            return res;
         }
     }
 }

@@ -1,21 +1,19 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Particles.Model
 {
     public class Atom
     {
+        public Color CirlceColor { get; set; }
+        public Color Color { get; set; }
         public float X { get; set; }
         public float Y { get; set; }
         public PointF Velocity;
         public float Speed => Velocity.Length();
         private float _radius;
         private float _mass;
-        public static float CoeffCollision = 1; //Коэффициент коллизии (столкновения), 1 или -1, направление вперед или в противоположную сторону
+        public static float CoeffCollision = 1; //Коэффициент коллизии (столкновения), 1 или -1, направление вперёд или в противоположную сторону
         public float Radius
         {
             get => _radius;
@@ -34,9 +32,9 @@ namespace Particles.Model
         public void Move()
         {
             
-            if (X <= Radius && Velocity.X < 0) Velocity.X *= -1; // Если координата Х <= 10, то меняем направление движения по оси Х на противоположное
+            if (X <= 0 && Velocity.X < 0) Velocity.X *= -1; // Если координата Х <= 10, то меняем направление движения по оси Х на противоположное
             else if (X >= Field.Width - Radius && Velocity.X > 0) Velocity.X *= -1f;
-            if (Y <= Radius && Velocity.Y < 0) Velocity.Y *= -1; // Если координата У <= 10, то меняем направление движения по оси У на противоположное
+            if (Y <= 0 && Velocity.Y < 0) Velocity.Y *= -1; // Если координата У <= 10, то меняем направление движения по оси У на противоположное
             else if (Y >= Field.Height - Radius && Velocity.Y > 0) Velocity.Y *= -1;
 
             X += Velocity.X * Field.DeltaTime;
@@ -82,5 +80,14 @@ namespace Particles.Model
                 ball.Velocity.Y = (float)(modBall * Math.Sin(angleBall));
             }
         }
+        public void ApplyForce(PointF force)
+        {
+            //calc acceleration
+            var acc = force.Mul(1 / Mass);
+            //clac moving offset
+            Velocity.X += acc.X * Field.DeltaTime;
+            Velocity.Y += acc.Y * Field.DeltaTime;
+        }
+
     }
 }
