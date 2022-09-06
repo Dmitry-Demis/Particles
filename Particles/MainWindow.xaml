@@ -10,8 +10,8 @@
        WindowStartupLocation="CenterScreen">
     <Grid Margin="5">
         <StackPanel Orientation="Vertical">
-            <Button Content="ЛР1. Маятник" Click="LR1_Pendulum_Click"/>
-            <Button Content="ЛР2. Маятник" Command="{Binding LW2_PendulumCommand}"/>
+            <Button Content="ЛР1. Маятник" Click="LR1_Pendulum_Click" IsEnabled="False"/>
+            <Button Content="ЛР2. Маятник" Click="Button_Click" IsEnabled="False" />
             <Button Content="ЛР3. Метод молекулярной динамики" Click="LR3_MolecularDynamics_Click"/>
         </StackPanel>
     </Grid>

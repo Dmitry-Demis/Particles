@@ -23,5 +23,11 @@ namespace Particles
             LW3_MolecularDynamicsMethod lW3_MolecularDynamicsMethod = new LW3_MolecularDynamicsMethod();
             lW3_MolecularDynamicsMethod.ShowDialog();
         }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            LW1_PendulumWindow lW1_PendulumWindow = new LW1_PendulumWindow();
+            lW1_PendulumWindow.ShowDialog();
+        }
     }
 }
